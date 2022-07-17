@@ -1,0 +1,36 @@
+import transformers
+from transformers import AutoConfig
+import datasets
+import shap
+import numpy as np
+
+class NlpExplainerShapTransformers:
+  """NlpExplainerShapTransformers :: Reduces Boilerplate for Transformers based shap visualization """
+  def __init__(self,text_values, config_default_classifier="nateraw/bert-base-uncased-emotion",config_default_task="text-classification"):
+    self.config_default_classifier = config_default_classifier #"nateraw/bert-base-uncased-emotion"
+    self.config_default_task = config_default_task
+    self.text_values=text_values
+    # load the model and tokenizer
+    tokenizer = transformers.AutoTokenizer.from_pretrained(config_default_classifier, use_fast=True)
+    model = transformers.AutoModelForSequenceClassification.from_pretrained(config_default_classifier).cuda()
+    config = AutoConfig.from_pretrained(config_default_classifier)
+    # build a pipeline object to do predictions
+    self.pred = pred = transformers.pipeline(config_default_task, model=model, tokenizer=tokenizer, device=0, return_all_scores=True)
+    self.explainer = explainer = shap.Explainer(pred)
+    self.shap_values = explainer(text_values)
+    ### Discover Labels from Transformers
+    discovered_classes = None
+    if hasattr(config, 'label2id'):
+      self.discovered_classes = discovered_classes = list(config.label2id.keys())
+    else:
+      raise Exception("Pls set config for this model")
+  def get_explainer(self):
+    return(self.explainer)
+  def get_shap_values(self):
+    return(self.shap_values)
+  def get_labels(self):
+    return(self.discovered_classes)
+  def get_predictions(self):
+    final_probs = []
+    final_probs = self.pred(self.text_values)
+    return(np.array(final_probs))
