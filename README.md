@@ -31,10 +31,21 @@ NlpExplainerShapTransformers (Bert Models Default bert-base-uncased-emotion )
 ```
 ## Coming in Future
 
+QnA
+
+Summarization
 
 Usage 
 ```
+from NlpExplainer.classifier.NlpExplainerShapTransformers import NlpExplainerShapTransformers
 
+obj_shap = NlpExplainerShapTransformers(text_values)
+print(obj_shap.get_labels())
+shap_values = obj_shap.get_shap_values()
+print(shap_values.shape)
+pred = obj_shap.get_predictions()
+print(pred)
+##Now use explainer to get graphs
 ```
 
 
